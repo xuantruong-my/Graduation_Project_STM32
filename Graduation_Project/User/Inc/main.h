@@ -17,4 +17,11 @@
 #include "timer.h"
 #include "servo.h"
 
+
+#define TARGET_ANGLE_ROLL   0.0f
+#define TARGET_ANGLE_PITCH  0.0f
+
+#define SERVO_ROLL_HOME   90.0f
+#define SERVO_PITCH_HOME  90.0f
+
 #endif

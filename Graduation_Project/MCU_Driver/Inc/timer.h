@@ -4,6 +4,36 @@
 #include <stdint.h>
 #define __VO		volatile
 
+#define TIMER_CR1_CEN_POS			0
+#define TIMER_CR1_URS_POS			2
+#define TIMER_CR1_DIR_POS			4
+#define TIMER_CR1_ARPE_POS			7
+
+#define TIMER_CCER_CC1E_POS			0
+#define TIMER_CCER_CC2E_POS			4
+#define TIMER_CCER_CC3E_POS			8
+#define TIMER_CCER_CC4E_POS			12
+
+#define TIMER_CCMR1_OC1PE_POS		3
+#define TIMER_CCMR1_OC2PE_POS		11
+#define TIMER_CCMR2_OC3PE_POS		3
+#define TIMER_CCMR2_OC4PE_POS		11
+
+#define TIMER_CCMR1_OC1M_POS		4
+#define TIMER_CCMR1_OC2M_POS		12
+#define TIMER_CCMR2_OC3M_POS		4
+#define TIMER_CCMR2_OC4M_POS		12
+
+#define TIMER_EGR_UG_POS			0
+
+#define TIMER_ACTIVE_MODE_VALUE		0x01
+#define TIMER_INACTIVE_MODE_VALUE	0x02
+#define TIMER_TOGGLE_MODE_VALUE		0x03
+#define TIMER_PWM_MODE1_VALUE		0x06
+#define TIMER_PWM_MODE2_VALUE		0x07
+
+#define TIMER_CCMR_CLEAR_OC_MASK	0x0F
+
 typedef struct {
 	__VO uint32_t CR1;
 	__VO uint32_t CR2;
@@ -32,23 +62,23 @@ typedef enum {
 	CHANNEL2 ,
 	CHANNEL3 ,
 	CHANNEL4
-} Channel_Timer;
+} TIMER_Channel;
 
 typedef enum {
-	SET_ACTIVE ,
-	SET_INACTIVE ,
-	TOGGLE ,
-	PWM_Mode1 ,
-	PWM_Mode2
-} Mode_OCompare;
+	TIMER_ACTIVE_MODE ,
+	TIMER_INACTIVE_MODE ,
+	TIMER_TOGGLE_MODE ,
+	TIMER_PWM_MODE1 ,
+	TIMER_PWM_MODE2
+} TIMER_Mode;
 
 typedef struct {
-	uint16_t PSC;
-	uint16_t ARR;
-	uint16_t CCR;
-	Channel_Timer channel;
-	Mode_OCompare mode;
-} Config_OCompare;
+	uint16_t timer_psc;
+	uint16_t timer_arr;
+	uint16_t timer_ccr;
+	TIMER_Channel timer_channel;
+	TIMER_Mode timer_mode;
+} TIMER_Config;
 
 #define TIMER1_ADD_BASE				0x40012C00UL
 #define TIMER2_ADD_BASE				0x40000000UL
@@ -60,26 +90,6 @@ typedef struct {
 #define TIMER3						((TIMER_TypeDef*)(TIMER3_ADD_BASE))
 #define TIMER4						((TIMER_TypeDef*)(TIMER4_ADD_BASE))
 
-
-void Delayms(TIMER_TypeDef *pTIM, uint16_t ms);
-
-void Delayus(TIMER_TypeDef *pTIM, uint32_t us);
-
-void TIM3_GetTick_Init(TIMER_TypeDef *pTIM);
-
-uint32_t TIM_GetTick();
-
-void InterruptTim_Init(TIMER_TypeDef *pTIM, uint16_t Time);
-
-void TIMInterrupt_Process(TIMER_TypeDef *pTIM);
-
-void TIM1_UP_IRQHandler();
-void TIM2_IRQHandler();
-void TIM3_IRQHandler();
-void TIM4_IRQHandler();
-
-void OPCompare_Init(TIMER_TypeDef *pTIM, Config_OCompare *config);
-
-void Tim2_Ch2Config();
+void TIMER_ModeInit(TIMER_TypeDef *pTIM, TIMER_Config *timer_config);
 
 #endif

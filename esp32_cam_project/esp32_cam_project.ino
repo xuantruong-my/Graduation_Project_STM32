@@ -7,17 +7,23 @@
 static unsigned long lastDebounceTime = 0;
 static bool lastButtonState = HIGH;
 
-void setup() {
+//-----------------------------------------------------------------------------------------//
+void setup() 
+{
   Serial.begin(115200);
-  pinMode(BUTTON_PIN, INPUT_PULLUP); // nut noi xuong GND khi bam
-  // ----- Cấu hình camera -----
-  if (!initCamera()) {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  //check config camera
+  if (!initCamera()) 
+  {
     return;
   }
-  // ----- Kết nối WiFi -----
+  
+  //connect to wifi
   WiFi.begin(ssid, password);
   Serial.print("Dang ket noi WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) 
+  {
     delay(500);
     Serial.print(".");
   }
@@ -25,25 +31,30 @@ void setup() {
   Serial.print("Da ket noi! Truy cap web tai: http://");
   Serial.println(WiFi.localIP());
 
-  // ----- Khởi động web server -----
+  //web server
   setupWebServer();
 }
 
-void loop() {
+//-----------------------------------------------------------------------------------------//
+void loop() 
+{
   handleWebServer();
 
-  // Đọc nút bấm với debounce
   bool reading = digitalRead(BUTTON_PIN);
 
-  if (reading != lastButtonState) {
+  if (reading != lastButtonState) 
+  {
     lastDebounceTime = millis();
   }
 
-  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
-    if (reading == LOW) { // nút bấm nối GND khi nhấn
+  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) 
+  {
+    if (reading == LOW) 
+    {
       capturePhoto();
-      delay(300); // tránh chụp liên tục khi giữ nút
+      delay(300);
     }
   }
+
   lastButtonState = reading;
 }

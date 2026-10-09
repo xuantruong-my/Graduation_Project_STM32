@@ -1,76 +1,76 @@
 #include "rcc.h"
 #include "gpio.h"
 
-void GPIO_Init(GPIO_TypeDef *pGPIO, uint16_t Pin, Mode_Pin Mode, Speed_Pin Speed)
+void GPIO_Init(GPIO_TypeDef *pGPIO, uint16_t gpio_pin, GPIO_PinMode gpio_pin_mode, GPIO_PinSpeed gpio_pin_speed)
 {
 
-	uint16_t position = 0;				//biến quét chân
-	uint8_t config = 0x00;				//biến cấu hình thanh ghi
+	uint16_t gpio_pin_position = 0;
+	uint8_t gpio_config_mask = 0x00;
 
-	switch(Speed)						//Cấu hình tốc độ chân
+	switch(gpio_pin_speed)
 	{
-		case NONE:		config |= 0x00;		break;
-		case SPEED_10M:	config |= 0x01;		break;
-		case SPEED_2M:	config |= 0x02;		break;
-		case SPEED_50M:	config |= 0x03;		break;
+		case GPIO_NONE:				gpio_config_mask |= GPIO_INPUT_VALUE;			break;
+		case GPIO_SPEED_10M:		gpio_config_mask |= GPIO_SPEED_10M_VALUE;		break;
+		case GPIO_SPEED_2M:			gpio_config_mask |= GPIO_SPEED_2M_VALUE;		break;
+		case GPIO_SPEED_50M:		gpio_config_mask |= GPIO_SPEED_50M_VALUE;		break;
 	}
 
-	switch(Mode)						//Cấu hình chế độ chân
+	switch(gpio_pin_mode)
 	{
-		case ANALOG_INPUT:		config |= (0x00 << 2);		break;
-		case FLOATING_INPUT:	config |= (0x01 << 2);		break;
-		case INPUT_PULLUP:		config |= (0x02 << 2);		break;
-		case INTPUT_PULLDOWN:	config |= (0x02 << 2);		break;
-		case OUTPUT_PUSHPULL:	config |= (0x00 << 2);		break;
-		case OUTPUT_OPENDR:		config |= (0x01 << 2);		break;
-		case ALT_PUSHPULL:		config |= (0x02 << 2);		break;
-		case ALT_OPENDR:		config |= (0x03 << 2);		break;
+		case GPIO_ANALOG_INPUT:		gpio_config_mask |= (GPIO_ANALOG_INPUT_MODE_VALUE    << GPIO_CRx_CNF_POS);		break;
+		case GPIO_FLOATING_INPUT:	gpio_config_mask |= (GPIO_FLOATING_INPUT_MODE_VALUE  << GPIO_CRx_CNF_POS);		break;
+		case GPIO_INPUT_PULLUP:		gpio_config_mask |= (GPIO_INPUT_PULLUP_MODE_VALUE    << GPIO_CRx_CNF_POS);		break;
+		case GPIO_INPUT_PULLDOWN:	gpio_config_mask |= (GPIO_INPUT_PULLDOWN_MODE_VALUE  << GPIO_CRx_CNF_POS);		break;
+		case GPIO_OUTPUT_PUSHPULL:	gpio_config_mask |= (GPIO_OUTPUT_PUSHPULL_MODE_VALUE << GPIO_CRx_CNF_POS);		break;
+		case GPIO_OUTPUT_OPENDR:	gpio_config_mask |= (GPIO_OUTPUT_OPENDR_MODE_VALUE   << GPIO_CRx_CNF_POS);		break;
+		case GPIO_ALT_PUSHPULL:		gpio_config_mask |= (GPIO_ALT_PUSHPULL_MODE_VALUE    << GPIO_CRx_CNF_POS);		break;
+		case GPIO_ALT_OPENDR:		gpio_config_mask |= (GPIO_ALT_OPENDR_MODE_VALUE      << GPIO_CRx_CNF_POS);		break;
 	}
 
-	for(position = 0; position < 16; position++)				// quét chân nào được chọn
+	for(gpio_pin_position = 0; gpio_pin_position < GPIO_PIN_TOTAL_COUNT; gpio_pin_position++)
 	{
-		if(Pin & (1 << position))								// kiểm tra chân được chọn
+		if(gpio_pin & (1 << gpio_pin_position))
 		{
-			if(position < 8)
+			if(gpio_pin_position < GPIO_CRL_PIN_COUNT)
 			{
-				pGPIO->CRL &=~ (0x0F << (4 * position));		//cấu hình thanh ghi CRL nếu là chân 0-7
-				pGPIO->CRL |= (config << (4 * position));
+				pGPIO->CRL &=~ (GPIO_CRx_PIN_CLEAR_MASK << (GPIO_CRx_PIN_BITWIDTH * gpio_pin_position));
+				pGPIO->CRL |= (gpio_config_mask << (GPIO_CRx_PIN_BITWIDTH * gpio_pin_position));
 			}
 			else
 			{
-				pGPIO->CRH &=~ (0x0F << (4* (position - 8)));	//cấu hình thanh ghi CRH nếu là chân 8-15
-				pGPIO->CRH |= (config << (4 * (position - 8)));
+				pGPIO->CRH &=~ (GPIO_CRx_PIN_CLEAR_MASK << (GPIO_CRx_PIN_BITWIDTH * (gpio_pin_position - GPIO_CRL_PIN_COUNT)));
+				pGPIO->CRH |= (gpio_config_mask << (GPIO_CRx_PIN_BITWIDTH * (gpio_pin_position - GPIO_CRL_PIN_COUNT)));
 			}
-			if(Mode == INPUT_PULLUP)							//nếu mode là input pullup thì ghi 1 vào thanh ghi output
-				pGPIO->ODR |= (1 << position);
-			else if(Mode == INTPUT_PULLDOWN)					//nếu mode là input pulldown thì ghi 0 vào thanh ghi output
-				pGPIO->ODR &=~ (1 << position);
+			if(gpio_pin_mode == GPIO_INPUT_PULLUP)
+				pGPIO->ODR |= (1 << gpio_pin_position);
+			else if(gpio_pin_mode == GPIO_INPUT_PULLDOWN)
+				pGPIO->ODR &=~ (1 << gpio_pin_position);
 		}
 	}
 }
 
 
-void GPIO_SetPin(GPIO_TypeDef *pGPIO, uint16_t Pin, State_Bit Bit)
+void GPIO_SetPin(GPIO_TypeDef *pGPIO, uint16_t gpio_pin, GPIO_BitState gpio_bit_state)
 {
-	uint16_t position = 0;
-	for(position = 0; position < 16; position++)
+	uint16_t gpio_pin_position = 0;
+	for(gpio_pin_position = 0; gpio_pin_position < GPIO_PIN_TOTAL_COUNT; gpio_pin_position++)
 	{
-		if(Pin & (1 << position))
+		if(gpio_pin & (1 << gpio_pin_position))
 		{
-			if(Bit == RESET)
-				pGPIO->ODR &=~ (1 << position);
-			else if(Bit == SET)
-				pGPIO->ODR |= (1 << position);
+			if(gpio_bit_state == GPIO_RESET)
+				pGPIO->ODR &=~ (1 << gpio_pin_position);
+			else if(gpio_bit_state == GPIO_SET)
+				pGPIO->ODR |= (1 << gpio_pin_position);
 		}
 	}
 }
 
-uint8_t GPIO_ReadPin(GPIO_TypeDef *pGPIO, uint16_t Pin)
+uint8_t GPIO_ReadPin(GPIO_TypeDef *pGPIO, uint16_t gpio_pin)
 {
-	if(pGPIO->IDR & Pin)
+	if(pGPIO->IDR & gpio_pin)
 	{
-		return SET;
+		return GPIO_SET;
 	}
-	return RESET;
+	return GPIO_RESET;
 }
 

@@ -5,6 +5,20 @@
 
 #define __VO			volatile
 
+#define UART_CR1_UE_POS					13
+#define UART_CR1_M_POS					12
+#define UART_CR1_TE_POS					3
+
+#define UART_CR2_STOP_POS				12
+
+#define UART_SR_TXE_POS					7
+#define UART_SR_TC_POS					6
+
+#define UART_CR2_CLEAR_STOP_MASK		0x03
+
+#define STM32_FREQUENCY					8000000
+#define UART_CALC_BRR_VALUE(baud)		((uint16_t)((STM32_FREQUENCY + ((baud) / 2)) / (baud)))
+
 typedef struct {
 	__VO uint32_t SR;
 	__VO uint32_t DR;
@@ -16,22 +30,17 @@ typedef struct {
 } UART_TypeDef;
 
 typedef enum {
-	DATA_8 ,
-	DATA_9 ,
-} Word_Length;
+	UART_DATA_8 ,
+	UART_DATA_9 ,
+} UART_WordLength;
 
 typedef enum {
-	BAU_2400 = 2400 ,
-	BAU_4800 = 4800 ,
-	BAU_9600 = 9600 ,
-	BAU_57600 = 57600 ,
-	BAU_115200 = 115200
-} BAUDRATE;
-
-typedef enum {
-	Interrupt ,
-	DMA
-} Mode_UART;
+	UART_BAUD_2400 = 2400 ,
+	UART_BAUD_4800 = 4800 ,
+	UART_BAUD_9600 = 9600 ,
+	UART_BAUD_57600 = 57600 ,
+	UART_BAUD_115200 = 115200
+} UART_Baudrate;
 
 #define UART1_ADD_BASE			0x40013800UL
 #define UART2_ADD_BASE			0x40004400UL
@@ -41,18 +50,11 @@ typedef enum {
 #define UART2					((UART_TypeDef*)(UART2_ADD_BASE))
 #define UART3					((UART_TypeDef*)(UART3_ADD_BASE))
 
-void UART_Transmit_Init(UART_TypeDef *pUART, Word_Length length, BAUDRATE baudrate);
+void UART_TransmitInit(UART_TypeDef *pUART, UART_WordLength uart_word_length, UART_Baudrate uart_baudrate);
 
-void Send_Character(UART_TypeDef *pUART, uint8_t data);
+void UART_SendCharacter(UART_TypeDef *pUART, uint8_t uart_data_transfer);
 
-void Send_All(UART_TypeDef *pUART, uint8_t *data, uint16_t size);
-
-void UART_RecITorDMA(UART_TypeDef *pUART, Word_Length length, BAUDRATE baudrate, Mode_UART mode);
-
-void UARTInterrupt_Process(UART_TypeDef *pUART);
-void USART1_IRQHandler();
-void USART2_IRQHandler();
-void USART3_IRQHandler();
+void UART_SendAll(UART_TypeDef *pUART, uint8_t *uart_data_transfer, uint16_t size);
 
 void mPrint(const char*format, ...);
 

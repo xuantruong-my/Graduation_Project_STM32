@@ -15,6 +15,7 @@ INC_DIR		:= MCU_Driver/Inc 	 						\
 CFLAG		:= $(foreach dir, $(INC_DIR), -I$(dir))
 CFLAG		+= $(MCU) -c -Wall -Os -g3 
 CFLAG		+= -ffunction-sections -fdata-sections
+CFLAG		+= -MMD -MP
 
 SRC_DIR		:= MCU_Driver/Src 	 						\
 			   Device_Driver/Src 						\

@@ -2,11 +2,13 @@
 #include "esp_camera.h"
 #include "camera_pin.h"
 
-// Buffer lưu ảnh mới nhất trong RAM (private trong file này)
+
 static uint8_t *lastPhoto = nullptr;
 static size_t lastPhotoLen = 0;
 
-bool initCamera() {
+//-----------------------------------------------------------------------------------------//
+bool initCamera() 
+{
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -29,42 +31,52 @@ bool initCamera() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
 
-  if (psramFound()) {
-    config.frame_size = FRAMESIZE_VGA;   // tăng lên SVGA/XGA nếu PSRAM ổn định
-    config.jpeg_quality = 12;
-    config.fb_count = 2;
-  } else {
-    config.frame_size = FRAMESIZE_QVGA;
-    config.jpeg_quality = 15;
-    config.fb_count = 1;
+  if (psramFound())       //check whether there is PSRAM
+  {
+    config.frame_size = FRAMESIZE_VGA;    // 640 x 480 pixels
+    config.jpeg_quality = 12;             //less compression
+    config.fb_count = 2;                  //2 buffers
+  } 
+  
+  else 
+  {
+    config.frame_size = FRAMESIZE_QVGA;   //320 x 240 pixels 
+    config.jpeg_quality = 15;             //more compression
+    config.fb_count = 1;                  //1 buffer
   }
 
   esp_err_t err = esp_camera_init(&config);
-  if (err != ESP_OK) {
+  if (err != ESP_OK) 
+  {
     Serial.printf("Camera khoi tao that bai: 0x%x\n", err);
     return false;
   }
-  sensor_t *s = esp_camera_sensor_get();
-  s->set_vflip(s, 1);
+
+  sensor_t *s = esp_camera_sensor_get();      //get a pointer to the running sensor's control struct
+  s->set_vflip(s, 1);                         //flip the image
   return true;
 }
 
-void capturePhoto() {
-  camera_fb_t * fb = esp_camera_fb_get();
-  if (!fb) {
+//-----------------------------------------------------------------------------------------//
+void capturePhoto() 
+{
+  camera_fb_t * fb = esp_camera_fb_get();     //trigger a capture
+  if (!fb) 
+  {
     Serial.println("Chup anh that bai");
     return;
   }
 
-  // Giải phóng buffer cũ nếu có
+  //free the old buffer for the new img
   if (lastPhoto != nullptr) {
     free(lastPhoto);
     lastPhoto = nullptr;
   }
 
-  // Copy ảnh mới vào buffer riêng (vì fb sẽ bị trả lại camera)
+  //copy new img into our own buffer
   lastPhoto = (uint8_t *) malloc(fb->len);
-  if (lastPhoto != nullptr) {
+  if (lastPhoto != nullptr) 
+  {
     memcpy(lastPhoto, fb->buf, fb->len);
     lastPhotoLen = fb->len;
     Serial.printf("Da chup anh, kich thuoc: %d bytes\n", lastPhotoLen);
@@ -73,10 +85,14 @@ void capturePhoto() {
   esp_camera_fb_return(fb);
 }
 
-const uint8_t* getLastPhoto() {
+//-----------------------------------------------------------------------------------------//
+const uint8_t* getLastPhoto() 
+{
   return lastPhoto;
 }
 
-size_t getLastPhotoLen() {
+//-----------------------------------------------------------------------------------------//
+size_t getLastPhotoLen()
+{
   return lastPhotoLen;
 }

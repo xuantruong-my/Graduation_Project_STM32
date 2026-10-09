@@ -21,6 +21,27 @@
 #define GPIO_PIN_14			(1U << 14)
 #define GPIO_PIN_15			(1U << 15)
 
+#define GPIO_CRx_CNF_POS					2
+
+#define GPIO_CRx_PIN_CLEAR_MASK				0x0F
+#define GPIO_CRx_PIN_BITWIDTH				4
+#define GPIO_CRL_PIN_COUNT					8
+#define GPIO_PIN_TOTAL_COUNT				16
+
+#define GPIO_INPUT_VALUE					0x00
+#define GPIO_SPEED_10M_VALUE				0x01
+#define GPIO_SPEED_2M_VALUE					0x02
+#define GPIO_SPEED_50M_VALUE				0x03
+
+#define GPIO_ANALOG_INPUT_MODE_VALUE		0x00
+#define GPIO_FLOATING_INPUT_MODE_VALUE		0x01
+#define GPIO_INPUT_PULLUP_MODE_VALUE		0x02
+#define GPIO_INPUT_PULLDOWN_MODE_VALUE		0x02
+#define GPIO_OUTPUT_PUSHPULL_MODE_VALUE		0x00
+#define GPIO_OUTPUT_OPENDR_MODE_VALUE		0x01
+#define GPIO_ALT_PUSHPULL_MODE_VALUE		0x02
+#define GPIO_ALT_OPENDR_MODE_VALUE			0x03
+
 typedef struct{
 	__VO uint32_t CRL;
 	__VO uint32_t CRH;
@@ -32,27 +53,27 @@ typedef struct{
 } GPIO_TypeDef;
 
 typedef enum {
-	ANALOG_INPUT ,
-	FLOATING_INPUT ,
-	INPUT_PULLUP ,
-	INTPUT_PULLDOWN ,
-	OUTPUT_PUSHPULL ,
-	OUTPUT_OPENDR ,
-	ALT_PUSHPULL ,
-	ALT_OPENDR
-} Mode_Pin;
+	GPIO_ANALOG_INPUT ,
+	GPIO_FLOATING_INPUT ,
+	GPIO_INPUT_PULLUP ,
+	GPIO_INPUT_PULLDOWN ,
+	GPIO_OUTPUT_PUSHPULL ,
+	GPIO_OUTPUT_OPENDR ,
+	GPIO_ALT_PUSHPULL ,
+	GPIO_ALT_OPENDR
+} GPIO_PinMode;
 
 typedef enum {
-	NONE ,
-	SPEED_10M ,
-	SPEED_2M ,
-	SPEED_50M
-} Speed_Pin;
+	GPIO_NONE ,
+	GPIO_SPEED_10M ,
+	GPIO_SPEED_2M ,
+	GPIO_SPEED_50M
+} GPIO_PinSpeed;
 
 typedef enum {
-	RESET ,
-	SET
-} State_Bit;
+	GPIO_RESET ,
+	GPIO_SET
+} GPIO_BitState;
 
 #define GPIOA_ADD_BASE		0x40010800UL
 #define GPIOB_ADD_BASE		0x40010C00UL
@@ -62,11 +83,11 @@ typedef enum {
 #define GPIOB				((GPIO_TypeDef*)(GPIOB_ADD_BASE))
 #define GPIOC				((GPIO_TypeDef*)(GPIOC_ADD_BASE))
 
-void GPIO_Init(GPIO_TypeDef *pGPIO, uint16_t Pin, Mode_Pin Mode, Speed_Pin Speed);
+void GPIO_Init(GPIO_TypeDef *pGPIO, uint16_t gpio_pin, GPIO_PinMode gpio_pin_mode, GPIO_PinSpeed gpio_pin_speed);
 
-void GPIO_SetPin(GPIO_TypeDef *pGPIO, uint16_t Pin, State_Bit Bit);
+void GPIO_SetPin(GPIO_TypeDef *pGPIO, uint16_t gpio_pin, GPIO_BitState gpio_bit_state);
 
-uint8_t GPIO_ReadPin(GPIO_TypeDef *pGPIO, uint16_t Pin);
+uint8_t GPIO_ReadPin(GPIO_TypeDef *pGPIO, uint16_t gpio_pin);
 
 
 #endif

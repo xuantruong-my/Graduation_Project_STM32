@@ -1,11 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// ----- Cấu hình WiFi -----
-const char* ssid = "Ngoc Nhu";
-const char* password = "15071980";
+const char* ssid = "TP-LINK_576C"; //TP-LINK_576C
+const char* password = "11111111"; //11111111
 
-// ----- Cấu hình nút bấm -----
 #define BUTTON_PIN 13
 const unsigned long DEBOUNCE_DELAY = 50; // ms
 

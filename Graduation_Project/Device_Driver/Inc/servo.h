@@ -4,15 +4,33 @@
 #include <stdint.h>
 #include "rcc.h"
 
+#define PID_MAX_OUTPUT          60.0f
+
+#define PID_INTEGRAL_MAX        500.0f
+
+#define SERVO_ANGLE_MAX         150.0f
+#define SERVO_ANGLE_MIN         30.0f
+
+#define SERVO_CCR_MIN           500.0f
+#define SERVO_CCR_MAX           2500.0f
+#define SERVO_ANGLE_RANGE_DEG   180.0f
+#define SERVO_CCR_ROUND_OFFSET  0.5f
+
+#define SERVO_TIMER_PSC         7
+#define SERVO_TIMER_ARR         19999
+
+#define SERVO_ANGLE_ROLL_HOME   90.0f
+#define SERVO_ANGLE_PITCH_HOME  90.0f
+
 typedef struct {
-    GPIO_TypeDef *Port;
-    TIMER_TypeDef *TIM;
-    uint16_t Pin;
-    Channel_Timer Channel;
-    Mode_OCompare Mode;
-    uint16_t CCR;
-    uint16_t ARR;
-    uint16_t PSC;
+    GPIO_TypeDef    *servo_port;
+    TIMER_TypeDef   *servo_timer;
+    uint16_t        servo_pin;
+    TIMER_Channel   servo_channel;
+    TIMER_Mode      servo_mode;
+    uint16_t        servo_ccr;
+    uint16_t        servo_arr;
+    uint16_t        servo_psc;
 } Servo_Typedef;
 
 typedef struct {
@@ -21,12 +39,12 @@ typedef struct {
     float last_error;
 } PID_State;
 
-void Servo_Init(Servo_Typedef *pServo);
+void SERVO_Init(Servo_Typedef *pServo);
 
-uint16_t AngleToCCR(float Angle);
+uint16_t SERVO_AngleToCCR(float angle);
 
-float PID_Compute(PID_State *pid_state, float angle, float target);
+float SERVO_PIDCompute(PID_State *pid_state, float angle, float target);
 
-void Servo_Config();
+void SERVO_Setup(void);
 
 #endif
